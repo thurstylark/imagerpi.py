@@ -10,6 +10,7 @@ Deploy mode will simply write the specified source to the specified destination,
 
 ## Dependencies
 
+- Python >= 3.5
 - [pyparted](https://github.com/rhinstaller/pyparted)
 - [tqdm](https://github.com/tqdm/tqdm)
 
