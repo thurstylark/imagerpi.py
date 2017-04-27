@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import parted, os, stat, argparse, logging, subprocess, tqdm
 
