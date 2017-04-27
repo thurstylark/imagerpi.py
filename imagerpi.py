@@ -24,9 +24,7 @@ def human2bytes(s):
 
 def is_blockdev(path):
     """Checks if path is a block device. An argparse extension."""
-    try:
-        stat.S_ISBLK(os.stat(path).st_mode)
-    except:
+    if not stat.S_ISBLK(os.stat(path).st_mode): 
         raise argparse.ArgumentTypeError(path + " is not a block device")
     return path
 
@@ -100,7 +98,7 @@ def shrinkfs(part, minfree):
         logging.debug(fsck_run.stdout)
         logging.debug(fsck_run.stderr)
         
-        print('Shrinking %s to %s blocks...', part.path, str(chrink_to / fs_blocksize))
+        print('Shrinking %s to %s blocks...', part.path, str(shrink_to / fs_blocksize))
         resize_run = subprocess.Popen(['resize2fs', part.path, str(shrink_to / fs_blocksize)], encoding='utf8', stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         logging.debug(resize_run.stdout)
         logging.debug(resize_run.stderr)
@@ -115,9 +113,9 @@ def shrinkpart(part, size):
     # Create a new geometry
     newgeo = parted.Geometry(
             start=part.geometry.start,
-            length=parted.sizeToSectors(shrink_to, 'B', dev.sectorSize),
+            length=parted.sizeToSectors(size, 'B', dev.sectorSize),
             device=dev)
-    logging.DEBUG(newgeo.__str__())
+#    logging.DEBUG(newgeo.__str__())
     # Create a new partition with our new geometry
     newpart = parted.Partition(
             disk=dsk, 
@@ -127,9 +125,11 @@ def shrinkpart(part, size):
     constraint = parted.Constraint( maxGeom=newgeo).intersect(dev.optimalAlignedConstraint)
     dsk.deletePartition(part)
     dsk.addPartition(partition=newpart, constraint=constraint)
+    # This exception gets raised even though dsk.commit() seems to do its job just fine.
+    # I am definitely not a fan of doing this, but so be it.
     try:
         dsk.commit()
-    except:
+    except parted._ped.IOException:
         pass
 
     return (newgeo.end + 1) * dev.sectorSize
