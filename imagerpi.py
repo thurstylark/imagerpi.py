@@ -88,17 +88,17 @@ def shrinkfs(part, minfree):
         shrink_to = fs_minsize + minfree
         
         if fs_cursize <= shrink_to:
-            print('%s does not need resize. Current size is less than or equal to target size.')
+            print('%s does not need resize. Current size is less than or equal to target size.' % part.path)
             return currentsize 
 
-        print("Partition needs resize. Resizing to %s bytes...", str(shrink_to))
+        print("Partition needs resize. Resizing to %s bytes..." % str(shrink_to))
         
-        print('Running `e2fsck -f %s`...', part.path)
+        print('Running `e2fsck -f %s`...' % part.path)
         fsck_run = subprocess.Popen(['e2fsck', '-f', part.path], encoding='utf8', stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         logging.debug(fsck_run.stdout)
         logging.debug(fsck_run.stderr)
         
-        print('Shrinking %s to %s blocks...', part.path, str(shrink_to / fs_blocksize))
+        print('Shrinking %s to %d blocks...' % (part.path, shrink_to / fs_blocksize))
         resize_run = subprocess.Popen(['resize2fs', part.path, str(shrink_to / fs_blocksize)], encoding='utf8', stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         logging.debug(resize_run.stdout)
         logging.debug(resize_run.stderr)
