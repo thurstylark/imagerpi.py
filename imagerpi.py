@@ -14,12 +14,12 @@ def human2bytes(s):
     symbols = ('B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
     letter = s[-1:].strip().upper()
     num = s[:-1]
-    assert num.isdigit() and letter in symbols, s
-    num = float(num)
-    prefix = {symbols[0]: 1}
-    for i, s in enumerate(symbols[1:]):
-        prefix[s] = 1 << (i + 1) * 10
-    return int(num * prefix[letter])
+    if num.isdigit() and letter in symbols:
+        num = float(num)
+        prefix = {symbols[0]: 1}
+        for i, s in enumerate(symbols[1:]):
+            prefix[s] = 1 << (i + 1) * 10
+        return int(num * prefix[letter])
 
 
 def is_blockdev(path):
@@ -28,7 +28,6 @@ def is_blockdev(path):
         stat.S_ISBLK(os.stat(path).st_mode)
     except:
         raise argparse.ArgumentTypeError(path + " is not a block device")
-        return False
     return path
 
 
@@ -69,8 +68,12 @@ def shrinkfs(part, minfree):
     except AttributeError:
         raise TypeError("must be type 'parted.partition.Partition'")
 
+    currentsize = (part.geometry.end + 1) * part.disk.device.sectorSize
+
     supported_filesystems = ['ext4']
-    assert part.fileSystem.type in supported_filesystems, "Filesystem type '%s' not supported for resize operation" % part.fileSystem.type
+    if part.fileSystem.type not in supported_filesystems:
+        print("Filesystem type '%s' not supported for resize operation" % part.fileSystem.type)
+        return currentsize
 
     minfree = human2bytes(minfree)
 
@@ -88,7 +91,7 @@ def shrinkfs(part, minfree):
         
         if fs_cursize <= shrink_to:
             print('%s does not need resize. Current size is less than or equal to target size.')
-            return (part.geometry.end + 1) * part.disk.device.sectorSize
+            return currentsize 
 
         print("Partition needs resize. Resizing to %s bytes...", str(shrink_to))
         
