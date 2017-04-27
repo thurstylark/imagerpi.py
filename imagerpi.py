@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-import parted, os, stat, argparse, logging, subprocess
-from tqdm import *
+import parted, os, stat, argparse, logging, subprocess, tqdm
 
 
 def human2bytes(s):
@@ -139,7 +138,7 @@ def docopy(src, dest, lastbyte, buffer_size):
     with open(dest, 'wb') as destfile:
         logging.debug("opening %s", src)
         with open(src, 'rb') as srcfile:
-            for startbyte in trange(0, lastbyte, buffer_size):
+            for startbyte in tqdm.trange(0, lastbyte, buffer_size):
                 endbyte = min(lastbyte, startbyte + buffer_size)
                 srcfile.seek(startbyte)
                 destfile.write(srcfile.read(buffer_size))
