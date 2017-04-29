@@ -1,6 +1,16 @@
 #!/usr/bin/env python3
 
-import parted, os, stat, argparse, logging, subprocess, tqdm
+import os, stat, argparse, logging, subprocess,
+
+try:
+    import parted
+except ImportError:
+    parted = None
+
+try:
+    import tqdm
+except ImportError:
+    tqdm = None
 
 
 def human2bytes(s):
@@ -67,6 +77,10 @@ def shrinkfs(part, minfree):
         raise TypeError("must be type 'parted.partition.Partition'")
 
     currentsize = (part.geometry.end + 1) * part.disk.device.sectorSize
+
+    if not parted:
+        print("Pyparted module not found. Skipping resize.")
+        return currentsize
 
     supported_filesystems = ['ext4']
     if part.fileSystem.type not in supported_filesystems:
@@ -137,11 +151,14 @@ def shrinkpart(part, size):
 
 def docopy(src, dest, lastbyte, buffer_size):
     """Copy src to dest from beginning to lastbyte in chunks of buffer_size bytes"""
+    # tqdm.trange() is a drop-in replacement for range() with an added progress bar.
+    if tqdm: range = tqdm.trange
+    print("Begining copy")
     logging.debug("opening %s", dest)
     with open(dest, 'wb') as destfile:
         logging.debug("opening %s", src)
         with open(src, 'rb') as srcfile:
-            for startbyte in tqdm.trange(0, lastbyte, buffer_size):
+            for startbyte in range(0, lastbyte, buffer_size):
                 endbyte = min(lastbyte, startbyte + buffer_size)
                 srcfile.seek(startbyte)
                 destfile.write(srcfile.read(buffer_size))
