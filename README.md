@@ -78,6 +78,7 @@ imagerpi.py deploy rpi.img /dev/mmcblk0
 
 ## TODO
 
+- Add support for expanding the partition and filesystem on deploy
 - Support compression (gz, xz, bzip2, et al.)
 - Re-tool partition resizing operation to operate on the resulting image file instead of on the source device
 - Add support for more filesystems 
