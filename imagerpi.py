@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, stat, argparse, logging, subprocess,
+import os, stat, argparse, logging, subprocess
 
 try:
     import parted
