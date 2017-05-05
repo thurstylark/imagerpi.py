@@ -4,15 +4,15 @@ Capture and deploy images of RaspberryPi SD Cards
 
 By default, capture mode will shrink the last partition on the source drive to the minimum as reported by `resize2fs(1)`, plus the value defined by `--free` (default: '500M'). This can be disabled by passing `--no-shrink`.
 
-Filesystem and partition shrinking is only supported for ext4 filesystems for the time being. If an unsupported filesystem is encountered, and `--no-shrink` was not specified, the resizing step will be skipped.
+Filesystem and partition shrinking is only supported for ext4 filesystems for the time being. If an unsupported filesystem is encountered and `--no-shrink` was not specified, or the pyparted module cannot be imported, the resizing step will be skipped.
 
 Deploy mode will simply write the specified source to the specified destination, no questions asked. Be sure you know what you're overwriting before going through with this.
 
 ## Dependencies
 
 - Python >= 3.5
-- [pyparted](https://github.com/rhinstaller/pyparted)
-- [tqdm](https://github.com/tqdm/tqdm)
+- [pyparted](https://github.com/rhinstaller/pyparted): For resizing partitions (optional)
+- [tqdm](https://github.com/tqdm/tqdm): For progress bar during copy (optional)
 
 ## Usage
 
@@ -78,8 +78,7 @@ imagerpi.py deploy rpi.img /dev/mmcblk0
 
 ## TODO
 
-- Make tqdm an optional dependency
-- Make pyparted an optional dependency
+- Add support for expanding the partition and filesystem on deploy
 - Support compression (gz, xz, bzip2, et al.)
 - Re-tool partition resizing operation to operate on the resulting image file instead of on the source device
 - Add support for more filesystems 
